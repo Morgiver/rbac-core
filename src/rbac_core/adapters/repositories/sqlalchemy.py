@@ -24,7 +24,7 @@ role_permissions = Table(
     "role_permissions",
     Base.metadata,
     Column("role_id", String(36), ForeignKey("roles.id"), primary_key=True),
-    Column("permission", String(255), primary_key=True),
+    Column("permission_id", String(36), ForeignKey("permissions.id"), primary_key=True),
 )
 
 
@@ -52,7 +52,7 @@ class RoleModel(Base):
         """Convert to domain Role."""
         return Role(
             id=self.id,
-            name=RoleName(self.name),
+            name=self.name,
             description=self.description,
             permissions={Permission.from_string(p.permission) for p in self.permissions},
             created_at=self.created_at,
@@ -269,6 +269,10 @@ class SQLAlchemyRoleRepository(IRoleRepository):
             self.session.query(RoleModel).filter(RoleModel.name == name.lower()).first()
             is not None
         )
+
+    def count(self) -> int:
+        """Count total number of roles."""
+        return self.session.query(RoleModel).count()
 
 
 class SQLAlchemyPolicyRepository(IPolicyRepository):

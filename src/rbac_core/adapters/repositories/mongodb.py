@@ -47,7 +47,7 @@ class MongoDBRoleRepository(IRoleRepository):
         """Convert MongoDB document to Role."""
         return Role(
             id=doc["_id"],
-            name=RoleName(doc["name"]),
+            name=doc["name"],  # Keep as string, domain model handles it
             description=doc["description"],
             permissions={Permission.from_string(p) for p in doc.get("permissions", [])},
             created_at=doc["created_at"],
@@ -91,6 +91,10 @@ class MongoDBRoleRepository(IRoleRepository):
     def exists_by_name(self, name: str) -> bool:
         """Check if role exists by name."""
         return self.collection.find_one({"name": name.lower()}) is not None
+
+    def count(self) -> int:
+        """Count total number of roles."""
+        return self.collection.count_documents({})
 
 
 class MongoDBPolicyRepository(IPolicyRepository):

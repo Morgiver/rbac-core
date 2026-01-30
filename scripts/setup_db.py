@@ -50,7 +50,7 @@ def setup_postgresql(host: str, port: int, db_name: str, username: str, password
     try:
         # Import SQLAlchemy models
         sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
-        from rbac_core.adapters.repositories.sqlalchemy.models import Base
+        from rbac_core.adapters.repositories.sqlalchemy import Base
 
         engine = create_engine(db_url)
         Base.metadata.create_all(engine)
@@ -90,39 +90,39 @@ def setup_mongodb(host: str, port: int, db_name: str, username: str, password: s
 
         # Roles collection
         roles_collection = db.roles
-        roles_collection.create_index("role_id", unique=True)
-        print(f"  Created unique index on roles.role_id")
-
         roles_collection.create_index("name", unique=True)
         print(f"  Created unique index on roles.name")
 
-        roles_collection.create_index("status")
-        print(f"  Created index on roles.status")
+        roles_collection.create_index("created_at")
+        print(f"  Created index on roles.created_at")
 
         # Policies collection
         policies_collection = db.policies
-        policies_collection.create_index("policy_id", unique=True)
-        print(f"  Created unique index on policies.policy_id")
+        policies_collection.create_index("name")
+        print(f"  Created index on policies.name")
 
-        policies_collection.create_index("name", unique=True)
-        print(f"  Created unique index on policies.name")
+        policies_collection.create_index("subjects")
+        print(f"  Created index on policies.subjects")
 
-        policies_collection.create_index("status")
-        print(f"  Created index on policies.status")
+        policies_collection.create_index("created_at")
+        print(f"  Created index on policies.created_at")
 
         # Role assignments collection
         role_assignments_collection = db.role_assignments
-        role_assignments_collection.create_index("assignment_id", unique=True)
-        print(f"  Created unique index on role_assignments.assignment_id")
-
-        role_assignments_collection.create_index("user_id")
-        print(f"  Created index on role_assignments.user_id")
+        role_assignments_collection.create_index("subject_id")
+        print(f"  Created index on role_assignments.subject_id")
 
         role_assignments_collection.create_index("role_id")
         print(f"  Created index on role_assignments.role_id")
 
-        role_assignments_collection.create_index([("user_id", 1), ("role_id", 1)], unique=True)
-        print(f"  Created unique compound index on role_assignments.user_id and role_id")
+        role_assignments_collection.create_index([("subject_id", 1), ("role_id", 1)])
+        print(f"  Created compound index on role_assignments.subject_id and role_id")
+
+        role_assignments_collection.create_index("assigned_at")
+        print(f"  Created index on role_assignments.assigned_at")
+
+        role_assignments_collection.create_index("expires_at")
+        print(f"  Created index on role_assignments.expires_at")
 
         client.close()
 
